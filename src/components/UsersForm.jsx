@@ -18,13 +18,13 @@ const UsersForm = ({userSelected, getUsers, deselectUser}) => {
         
         if(userSelected){
         //acualizando usuario
-            axios.put (`https://users-crud1.herokuapp.com/users/${userSelected.id}/`, data)
+            axios.put (`https://users-crud.academlo.tech/users/${userSelected.id}/`, data)
                 .then(() => getUsers());
         
         } else { 
 
         //creando usuario
-        axios.post('https://users-crud1.herokuapp.com/users/', data)
+        axios.post('https://users-crud.academlo.tech/users/', data)
             .then(() =>getUsers)
             .catch(error => console.log(error.response))
     
