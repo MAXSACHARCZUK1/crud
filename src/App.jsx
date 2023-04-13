@@ -1,41 +1,105 @@
-import { useState } from 'react'
-import UsersList from './components/UsersList'
-import UsersForm from './components/UsersForm'
-import './App.css'
-import { useEffect } from 'react'
+
 import axios from 'axios'
+import { useEffect, useState } from 'react'
+import './App.css'
+//import Header from'./components/Header'
+import FormUsers from './components/FormUsers'
+import UserCard from './components/UserCard'
+
+const baseURL = "https://users-crud.academlo.tech/";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [users, setUsers] = useState();
 
-  const [users, setUsers] = useState([])
-  const [userSelected, setUserSelected] = useState(null)
+  //esto para pasar info desde UseCard hasta FormUser
+  const [updateInfo, setUpdateInfo] = useState();
+  //console.log(updateInfo)
+  //Esto es para cerrar el modal
+  const [formIsClose, setFormIsClose] = useState(true);
 
-  useEffect (() => {
-    axios.get('https://users-crud.academlo.tech/users/')
-        .then(res => setUsers(res.data));
-  }, [])
+  //Para hacer el get de todos los users
+  const getAllUsers = () => {
+    const URL = `${baseURL}/users`;
+    axios
+      .get(URL)
+      .then((res) => setUsers(res.data))
+      .catch((err) => console.log(err));
+  };
 
-  const getUsers = () => {
-    axios.get('https://users-crud.academlo.tech/users/')
-        .then(res => getUsers(res.data));
-  }
+  useEffect(() => {
+    getAllUsers();
+  }, []);
 
-  const selectUser = (user) => {
-    setUserSelected(user)
-  }
+  //Para crear un nuevo usuario
+  const createNewUSer = (data) => {
+    const URL = `${baseURL}/users/`;
+    axios
+      .post(URL, data)
+      .then((res) => {
+        console.log(res.data);
+        getAllUsers();
+      })
+      .catch((err) => console.log(err));
+  };
 
+  //Para eliminar un usuario especifico
+  const deleteUserById = (id) => {
+    const URL = `${baseURL}/users/${id}`;
+    axios
+      .delete(URL)
+      .then((res) => {
+        console.log(res.data);
+        getAllUsers();
+      })
+      .catch((err) => console.log(err));
+  };
 
-  const deselectUser = () => setUserSelected(null);
+  //Para actualizar un usuario en especifico
+  const updateUserById = (id, data) => {
+    const URL = `${baseURL}/users/${id}/`;
+
+    axios
+      .patch(URL, data)
+      .then((res) => {
+        console.log(res.data);
+        getAllUsers();
+      })
+      .catch((err) => console.log(err));
+  };
+  const handleOpenForm = () => {
+    setFormIsClose(false);
+  };
 
   return (
-    <div className="App">  
-     
-     <UsersForm userSelected={userSelected} getUsers={getUsers} deselectUser={deselectUser}/>
-     <UsersList getUsers= {getUsers} selectUser={selectUser} users={users}/>
-    
+    <div className="App">
+      <div className="App_container-title">
+        <h1 className="App_title">Users CRUD</h1>
+        <button onClick={handleOpenForm} className="App_btn">
+          Create a New User
+        </button>
+      </div>
+      <div className={`form-container ${formIsClose && "disable_form"}`}>
+        <FormUsers
+          CreateNewUser={createNewUSer}
+          updateInfo={updateInfo}
+          updateUserById={updateUserById}
+          setUpdateInfo={setUpdateInfo}
+          setFormIsClose={setFormIsClose}
+        />
+      </div>
+      <div className="users-container">
+        {users?.map((user) => (
+          <UserCard
+            key={user.id}
+            user={user}
+            deleteUserById={deleteUserById}
+            setUpdateInfo={setUpdateInfo}
+            setFormIsClose={setFormIsClose}
+          />
+        ))}
+      </div>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
